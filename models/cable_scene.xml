@@ -1,0 +1,193 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="empty_scene">
+  <compiler angle="degree" />
+  
+  <default>
+    <default class="ur5e">
+      <material specular="0.5" shininess="0.25" />
+      <joint axis="0 1 0" range="-6.28319 6.28319" armature="0.1" />
+      <general gaintype="fixed" biastype="affine" ctrlrange="-6.2831 6.2831" gainprm="2000" biasprm="0 -2000 -400" forcerange="-150 150" />
+      <default class="size3">
+        <default class="size3_limited">
+          <joint range="-3.1415 3.1415" />
+          <general ctrlrange="-3.1415 3.1415" />
+        </default>
+      </default>
+      <default class="size1">
+        <general gainprm="500" biasprm="0 -500 -100" forcerange="-28 28" />
+      </default>
+      <default class="visual">
+        <geom type="mesh" contype="0" conaffinity="0" group="2" />
+      </default>
+      <default class="collision">
+        <geom type="capsule" group="3" />
+        <default class="eef_collision">
+          <geom type="cylinder" />
+        </default>
+      </default>
+      <site size="0.001" rgba="0.5 0.5 0.5 0.3" group="4" />
+    </default>
+  </default>
+  <option timestep="0.01" gravity="0 0 -9.81" />
+
+
+  <visual>
+    
+    <quality shadowsize="0" />
+  </visual>
+
+  <asset>
+    
+    <mesh name="table_mesh" file="table/sigmund_table.stl" scale="1 1 1" />
+    
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="512" />
+    <texture name="texplane" type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 .15 .2" width="512" height="512" mark="cross" markrgb=".8 .8 .8" />
+    <material name="matplane" reflectance="0" texture="texplane" texrepeat="1 1" texuniform="true" />
+    
+    <material class="ur5e" name="black" rgba="0.033 0.033 0.033 1" />
+    <material class="ur5e" name="jointgray" rgba="0.278 0.278 0.278 1" />
+    <material class="ur5e" name="linkgray" rgba="0.82 0.82 0.82 1" />
+    <material class="ur5e" name="urblue" rgba="0.49 0.678 0.8 1" />
+
+    <mesh name="base_0" file="ur5e/assets/base_0.stl" />
+    <mesh name="base_1" file="ur5e/assets/base_1.stl" />
+    <mesh name="shoulder_0" file="ur5e/assets/shoulder_0.stl" />
+    <mesh name="shoulder_1" file="ur5e/assets/shoulder_1.stl" />
+    <mesh name="shoulder_2" file="ur5e/assets/shoulder_2.stl" />
+    <mesh name="upperarm_0" file="ur5e/assets/upperarm_0.stl" />
+    <mesh name="upperarm_1" file="ur5e/assets/upperarm_1.stl" />
+    <mesh name="upperarm_2" file="ur5e/assets/upperarm_2.stl" />
+    <mesh name="upperarm_3" file="ur5e/assets/upperarm_3.stl" />
+    <mesh name="forearm_0" file="ur5e/assets/forearm_0.stl" />
+    <mesh name="forearm_1" file="ur5e/assets/forearm_1.stl" />
+    <mesh name="forearm_2" file="ur5e/assets/forearm_2.stl" />
+    <mesh name="forearm_3" file="ur5e/assets/forearm_3.stl" />
+    <mesh name="wrist1_0" file="ur5e/assets/wrist1_0.stl" />
+    <mesh name="wrist1_1" file="ur5e/assets/wrist1_1.stl" />
+    <mesh name="wrist1_2" file="ur5e/assets/wrist1_2.stl" />
+    <mesh name="wrist2_0" file="ur5e/assets/wrist2_0.stl" />
+    <mesh name="wrist2_1" file="ur5e/assets/wrist2_1.stl" />
+    <mesh name="wrist2_2" file="ur5e/assets/wrist2_2.stl" />
+    <mesh name="wrist3" file="ur5e/assets/wrist3.stl" />
+  </asset>
+
+  <worldbody>
+    
+    <body name="cable_anchor_left" pos="-0.200000 0.000000 0.740000">
+      </body>
+    <body name="cable_anchor_right" pos="0.200000 0.000000 0.740000">
+      </body>
+    
+    <geom name="ground" type="plane" pos="0 0 0" size="0 0 .25" material="matplane" condim="3" />
+    
+    <body name="table" pos="0 0 0.5">
+      <geom type="mesh" mesh="table_mesh" condim="3" rgba="0.25 0.25 0.25 1" />
+    </body>
+
+    <!-- Small stylized structure: orange base + black plate with two circular holes (visual approximation) -->
+    <body name="small_struct" pos="-0.25 1.1 0.481">
+      <!-- orange base (flat cylinder) -->
+      <geom type="cylinder" pos="0 0 0.02" size="0.04 0.005" rgba="1 0.36 0 1" contype="0" conaffinity="0" />
+      <!-- black vertical plate sitting on the base -->
+      <geom type="box" pos="0 0 0.05" size="0.025 0.01 0.03" rgba="0.45 0.45 0.45 1" contype="0" conaffinity="0" />
+      <!-- two circular holes approximated by white cylinders that pass through the plate -->
+      <!-- <geom type="cylinder" pos="-0.02 0 0.14" size="0.035 0.08" rgba="0.95 0.95 0.95 1" contype="0" conaffinity="0" />
+      <geom type="cylinder" pos="0.02 0 0.14" size="0.025 0.08" rgba="0.95 0.95 0.95 1" contype="0" conaffinity="0" /> -->
+    </body>
+
+    
+    <body name="ur5e_base" pos="-0.15 0.25 0.50" quat="0.70710678 0 0 0.70710678" childclass="ur5e">
+      <inertial mass="4.0" pos="0 0 0" diaginertia="0.00443333156 0.00443333156 0.0072" />
+      <geom mesh="base_0" material="black" class="visual" />
+      <geom mesh="base_1" material="jointgray" class="visual" />
+      <body name="shoulder_link" pos="0 0 0.163">
+        <inertial mass="3.7" pos="0 0 0" diaginertia="0.0102675 0.0102675 0.00666" />
+        <joint name="shoulder_pan_joint" class="size3" axis="0 0 1" damping="1000000000000" />
+        <geom mesh="shoulder_0" material="urblue" class="visual" />
+        <geom mesh="shoulder_1" material="black" class="visual" />
+        <geom mesh="shoulder_2" material="jointgray" class="visual" />
+        <geom class="collision" size="0.06 0.06" pos="0 0 -0.04" />
+        <body name="upper_arm_link" pos="0 0.138 0" quat="1 0 1 0">
+          <inertial mass="8.393" pos="0 0 0.2125" diaginertia="0.133886 0.133886 0.0151074" />
+          <joint name="shoulder_lift_joint" class="size3" damping="10000" />
+          <geom mesh="upperarm_0" material="linkgray" class="visual" />
+          <geom mesh="upperarm_1" material="black" class="visual" />
+          <geom mesh="upperarm_2" material="jointgray" class="visual" />
+          <geom mesh="upperarm_3" material="urblue" class="visual" />
+          <geom class="collision" pos="0 -0.04 0" quat="1 1 0 0" size="0.06 0.06" />
+          <geom class="collision" size="0.05 0.2" pos="0 0 0.2" />
+          <body name="forearm_link" pos="0 -0.131 0.425">
+            <inertial mass="2.275" pos="0 0 0.196" diaginertia="0.0311796 0.0311796 0.004095" />
+            <joint name="elbow_joint" class="size3_limited" damping="10000" />
+            <geom mesh="forearm_0" material="urblue" class="visual" />
+            <geom mesh="forearm_1" material="linkgray" class="visual" />
+            <geom mesh="forearm_2" material="black" class="visual" />
+            <geom mesh="forearm_3" material="jointgray" class="visual" />
+            <geom class="collision" pos="0 0.08 0" quat="1 1 0 0" size="0.055 0.06" />
+            <geom class="collision" size="0.038 0.19" pos="0 0 0.2" />
+            <body name="wrist_1_link" pos="0 0 0.392" quat="1 0 1 0">
+              <inertial mass="1.219" pos="0 0.127 0" diaginertia="0.0025599 0.0025599 0.0021942" />
+              <joint name="wrist_1_joint" class="size1" damping="10000" />
+              <geom mesh="wrist1_0" material="black" class="visual" />
+              <geom mesh="wrist1_1" material="urblue" class="visual" />
+              <geom mesh="wrist1_2" material="jointgray" class="visual" />
+              <geom class="collision" pos="0 0.05 0" quat="1 1 0 0" size="0.04 0.07" />
+              <body name="wrist_2_link" pos="0 0.127 0">
+                <inertial mass="1.219" pos="0 0 0.1" diaginertia="0.0025599 0.0025599 0.0021942" />
+                <joint name="wrist_2_joint" axis="0 0 1" class="size1" damping="10000" />
+                <geom mesh="wrist2_0" material="black" class="visual" />
+                <geom mesh="wrist2_1" material="urblue" class="visual" />
+                <geom mesh="wrist2_2" material="jointgray" class="visual" />
+                <geom class="collision" size="0.04 0.06" pos="0 0 0.04" />
+                <geom class="collision" pos="0 0.02 0.1" quat="1 1 0 0" size="0.04 0.04" />
+                <body name="wrist_3_link" pos="0 0 0.1">
+                  <inertial mass="0.1889" pos="0 0.0771683 0" quat="1 0 0 1" diaginertia="0.000132134 9.90863e-05 9.90863e-05" />
+                  <joint name="wrist_3_joint" class="size1" damping="10000" />
+                  <geom material="linkgray" mesh="wrist3" class="visual" />
+                  <geom class="eef_collision" pos="0 0.08 0" quat="1 1 0 0" size="0.04 0.02" />
+                  <site name="attachment_site" pos="0 0.1 0" quat="-1 1 0 0" />
+                  <body name="gripper_mount" pos="0 0.12 0">
+                    <body name="finger_left" pos="-0.03 0 0">
+                      <joint name="gripper_left_joint" type="slide" axis="1 0 0" range="0 0.05" damping="10000" />
+                      <geom pos="0 0 0" type="box" size="0.01 0.02 0.02" rgba="0.6 0.6 0.6 1" />
+                      <geom name="grip_left_inner_geom" pos="0.007 0 0" type="box" size="0.003 0.02 0.02" rgba="0.8 0.1 0.1 1" />
+                      <site name="grip_left_tip" pos="0.01 0 0" size="0.005" rgba="1 0 0 0.3" />
+                    </body>
+                    <body name="finger_right" pos="0.03 0 0">
+                      <joint name="gripper_right_joint" type="slide" axis="-1 0 0" range="0 0.05" damping="10000" />
+                      <geom pos="0 0 0" type="box" size="0.01 0.02 0.02" rgba="0.6 0.6 0.6 1" />
+                      <geom name="grip_right_inner_geom" pos="-0.007 0 0" type="box" size="0.003 0.02 0.02" rgba="0.1 0.8 0.1 1" />
+                      <site name="grip_right_tip" pos="-0.01 0 0" size="0.005" rgba="0 1 0 0.3" />
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+    
+  <body name="cable_group" pos="-0.800000 0.850000 0.5025" quat="1 -1 0 0">
+  <!-- <geom type="sphere" pos="0.000000 0.000000 0.000000" size="0.016478" rgba="1 0.5 0 1" contype="0" conaffinity="0" />
+  <geom type="sphere" pos="0.878800 0.000000 0.000000" size="0.016478" rgba="1 0.5 0 1" contype="0" conaffinity="0" /> -->
+  <geom type="capsule" fromto="0.211268 0.000000 -0.158769 0.230539 0.000000 -0.168644" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.230539 0.000000 -0.168644 0.250267 0.000000 -0.177575" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.250267 0.000000 -0.177575 0.270422 0.000000 -0.185488" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.270422 0.000000 -0.185488 0.290785 0.000000 -0.192858" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.290785 0.000000 -0.192858 0.311349 0.000000 -0.199640" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.311349 0.000000 -0.199640 0.332250 0.000000 -0.205280" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.332250 0.000000 -0.205280 0.353423 0.000000 -0.209820" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.353423 0.000000 -0.209820 0.374722 0.000000 -0.213723" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.374722 0.000000 -0.213723 0.396162 0.000000 -0.216707" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.396162 0.000000 -0.216707 0.417751 0.000000 -0.218240" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.417751 0.000000 -0.218240 0.439400 0.000000 -0.218609" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.439400 0.000000 -0.218609 0.461049 0.000000 -0.218240" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.461049 0.000000 -0.218240 0.482638 0.000000 -0.216707" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.482638 0.000000 -0.216707 0.504078 0.000000 -0.213723" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.504078 0.000000 -0.213723 0.525377 0.000000 -0.209820" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.525377 0.000000 -0.209820 0.546550 0.000000 -0.205280" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.546550 0.000000 -0.205280 0.567451 0.000000 -0.199640" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.567451 0.000000 -0.199640 0.588017 0.000000 -0.192858" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.588017 0.000000 -0.192858 0.608378 0.000000 -0.185488" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.608378 0.000000 -0.185488 0.628533 0.000000 -0.177575" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.628533 0.000000 -0.177575 0.648261 0.000000 -0.168644" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.648261 0.000000 -0.168644 0.667532 0.000000 -0.158769" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.667532 0.000000 -0.158769 0.686561 0.000000 -0.148437" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.686561 0.000000 -0.148437 0.705361 0.000000 -0.137686" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /><geom type="capsule" fromto="0.705361 0.000000 -0.137686 0.723727 0.000000 -0.126222" size="0.005492" rgba="1 0.5 0 1" contype="0" conaffinity="0" /> </body>
+  </worldbody>
+  
+  <actuator>
+    
+    <position name="shoulder_pan" joint="shoulder_pan_joint" kp="5" />
+    <position name="shoulder_lift" joint="shoulder_lift_joint" kp="5" />
+    <position name="elbow" joint="elbow_joint" kp="5" />
+    <position name="wrist_1" joint="wrist_1_joint" kp="5" />
+    <position name="wrist_2" joint="wrist_2_joint" kp="5" />
+    <position name="wrist_3" joint="wrist_3_joint" kp="5" />
+    
+    <position name="gripper_left" joint="gripper_left_joint" kp="30" />
+    <position name="gripper_right" joint="gripper_right_joint" kp="30" />
+  </actuator>
+  
+  <keyframe>
+    <key time="0" qpos="-0.016525 -89.983520 89.973136 0.025409 89.999479 0.021375 0.001442 -0.001442" />
+  </keyframe>
+</mujoco>
