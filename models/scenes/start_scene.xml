@@ -1,0 +1,120 @@
+<mujoco model="start scene">
+    <compiler angle="radian" autolimits="true" meshdir="../models/ur5e/assets" />
+    <option timestep="0.002" integrator="implicitfast" solver="PGS" gravity="0 0 -9.82" cone="elliptic" />
+    <extension>
+        <plugin plugin="mujoco.elasticity.cable"/>
+    </extension>
+
+    <!-- Include the UR5e robot -->
+    <include file="../models/ur5e/ur5e.xml" />
+
+    <statistic center="0.3 0 0.3" extent="0.8" meansize="0.08" />
+
+    <visual>
+        <headlight diffuse="0.6 0.6 0.6" ambient="0.1 0.1 0.1" specular="0 0 0" />
+        <rgba haze="0.15 0.25 0.35 1" />
+        <global azimuth="120" elevation="-20" />
+    </visual>
+
+    <asset>
+        <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072" />
+        <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300" />
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2" />
+    <!-- Table mesh asset -->
+    <mesh name="table" file="../../table/sigmund_table.stl" scale="1 1 1"/>
+    </asset>
+
+    <worldbody>
+        <light pos="0 0 1.5" dir="0 0 -1" directional="true" />
+        <geom name="floor" size="0 0 0.05" type="plane" material="groundplane" />
+        <geom name="x-axis" group="2" type="cylinder" contype="0" conaffinity="0" fromto="0 0 0 1 0 0" size="0.01" rgba="1 0 0 1" />
+        <geom name="y-axis" group="2" type="cylinder" contype="0" conaffinity="0" fromto="0 0 0 0 1 0" size="0.01" rgba="0 1 0 1" />
+        <geom name="z-axis" group="2" type="cylinder" contype="0" conaffinity="0" fromto="0 0 0 0 0 1" size="0.01" rgba="0 0 1 1" />
+        <!-- Objects for pick up -->
+        <!-- <body name="cylinder" pos="0.1 0.6 0.76" euler="0 1.5708 0">
+            <joint type="free" />
+            <geom name="cylinder" type="cylinder" size="0.012 0.02" rgba="1 1 0 1" condim="6" solref="0.0000000001 1"/>
+        </body> -->
+        <!-- Short physics cable using MuJoCo native <cable> element -->
+        <!-- This replaces the previous chain-of-spherical-beads. The cable is
+             attached at the world-space position near where the previous
+             cable root lived (0.55, 0.6, 0.86). We configure length and
+             physical properties to approximate the previous cable. -->
+        <body name="cable_root" pos="0.55 0.6 0.86">
+            <!-- Keep a free joint so cable root can translate/rotate slightly -->
+            <joint name="cable_root_joint" type="free" damping="0.0" />
+           <!-- Native cable implemented via the documented composite cable example.
+                 Uses the mujoco.elasticity.cable plugin to get twist/bend behavior
+                 while generating an inextensible chain of capsules (or boxes).
+                 The 'curve' sets the undeformed centerline; 'initial="none"'
+                 preserves the stated positions. -->
+                <composite type="cable" count="20 1 1" curve="s 0 0" initial="none" size="0.25">
+                    <plugin plugin="mujoco.elasticity.cable">
+                        <config key="bend" value="1e6"/>
+                        <config key="twist" value="5e8"/>
+                        <config key="vmax" value="0"/>
+                    </plugin>
+                    <joint kind="main" damping="0.05" armature="0.01"/>
+                    <geom type="capsule" size="0.006" rgba="0.8 0.2 0.1 1"/>
+                </composite>
+        </body>
+
+        <!-- Cable stands (two I-shaped pillars) placed on top of the table so the cable can rest on them -->
+        <!-- These bodies have no joint, so they are fixed (welded) in world coordinates. They are positioned on the simple_table top (z~=0.69). -->
+        <body name="cable_stand_left" pos="0.7 0.6 0.69">
+            <!-- vertical web (centered so bottom rests on table top) -->
+            <geom name="stand_left_web" type="box" pos="0 0 0.075" size="0.005 0.005 0.075" rgba="0.45 0.45 0.45 1"/>
+            <!-- top flange replaced by a V-shaped cradle: two thin arms rotated toward center -->
+            <geom name="stand_left_arm_a" type="box" pos="0 0.008 0.155" euler="0.35 0 0" size="0.003 0.01 0.005" rgba="0.45 0.45 0.45 1"/>
+            <geom name="stand_left_arm_b" type="box" pos="0 -0.008 0.155" euler="-0.35 0 0" size="0.003 0.01 0.005" rgba="0.45 0.45 0.45 1"/>
+            <!-- small bottom flange for I-like appearance -->
+            <geom name="stand_left_bot" type="box" pos="0 0 -0.005" size="0.015 0.02 0.005" rgba="0.45 0.45 0.45 1"/>
+        </body>
+
+        <body name="cable_stand_right" pos="0.6 0.6 0.69">
+            <geom name="stand_right_web" type="box" pos="0 0 0.075" size="0.005 0.005 0.075" rgba="0.45 0.45 0.45 1"/>
+            <geom name="stand_right_arm_a" type="box" pos="0 0.008 0.155" euler="0.35 0 0" size="0.003 0.01 0.005" rgba="0.45 0.45 0.45 1"/>
+            <geom name="stand_right_arm_b" type="box" pos="0 -0.008 0.155" euler="-0.35 0 0" size="0.003 0.01 0.005" rgba="0.45 0.45 0.45 1"/>
+            <geom name="stand_right_bot" type="box" pos="0 0 -0.005" size="0.015 0.02 0.005" rgba="0.45 0.45 0.45 1"/>
+        </body>
+
+        <!--table -->
+		<body name = "table1" euler="0 0 0" pos= "0.8 0 0.74" >
+		  <geom name = "table1" type="mesh" mesh="table" group="2" rgba="0.35 0.35 0.35 1" mass="0" contype="0" conaffinity="0"/>
+		</body>
+        <body name="simple_table" pos="0.4 0.6 0.69" quat="1 0 0 0">
+            <geom name="simple_table" type="box" size="0.4 0.6 0.05" rgba="0.5 0.5 0.5 0.1"/>
+            <!-- Pillar centered on the table with a rectangular pass-through hole on its face -->
+            <!-- Pillar body positioned so its base sits on the table top: table half-height 0.05 + pillar half-height 0.12 = 0.17 -->
+            <body name="simple_table_pillar" pos="-0.3 0.0 0.135" euler="0 0 1.5708">
+                <!-- Left wall of the pillar (creates opening in center) -->
+                <geom name="pillar_wall_left" type="box" pos="-0.024 0 0" size="0.01 0.04 0.08" rgba="0.6 0.6 0.6 1"/>
+                <!-- Right wall of the pillar -->
+                <geom name="pillar_wall_right" type="box" pos="0.024 0 0" size="0.01 0.04 0.08" rgba="0.6 0.6 0.6 1"/>
+                <!-- Top horizontal frame (upper half) -->
+                <geom name="pillar_frame_top" type="box" pos="0 0 0.065" size="0.03 0.04 0.01" rgba="0.6 0.6 0.6 1"/>
+                <!-- Bottom horizontal frame (lower half) -->
+                <geom name="pillar_frame_bottom" type="box" pos="0 0 -0.03" size="0.03 0.04 0.055" rgba="0.6 0.6 0.6 1"/>
+                <!-- Pipe represented as a hollow ring approximated by 12 thin box segments (keeps pipe fixed to table) -->
+                <body name="table_pipe" pos="0 0.0 0.04" euler="1.5708 0 0">
+                    <!-- ring radius 0.02 m, wall thickness modeled by narrow boxes, height ~0.03 m -->
+                    <geom name="table_pipe_ring_00" type="box" pos="0.02 0 0" euler="0 0 0" size="0.003 0.006 0.04" rgba="00.6 0.6 0.6 1"/>
+                    <geom name="table_pipe_ring_01" type="box" pos="0.01732 0.01 0" euler="0 0 0.5236" size="0.003 0.006 0.04" rgba="0.6 0.6 0.6 1"/>
+                    <geom name="table_pipe_ring_02" type="box" pos="0.01 0.01732 0" euler="0 0 1.0472" size="0.003 0.006 0.04" rgba="0.6 0.6 0.6 1"/>
+                    <geom name="table_pipe_ring_03" type="box" pos="0 0.02 0" euler="0 0 1.5708" size="0.003 0.006 0.04" rgba="0.6 0.6 0.6 1"/>
+                    <geom name="table_pipe_ring_04" type="box" pos="-0.01 0.01732 0" euler="0 0 2.0944" size="0.003 0.006 0.04" rgba="0.6 0.6 0.6 1"/>
+                    <geom name="table_pipe_ring_05" type="box" pos="-0.01732 0.01 0" euler="0 0 2.6180" size="0.003 0.006 0.04" rgba="0.6 0.6 0.6 1"/>
+                    <geom name="table_pipe_ring_06" type="box" pos="-0.02 0 0" euler="0 0 3.1416" size="0.003 0.006 0.04" rgba="0.6 0.6 0.6 1"/>
+                    <geom name="table_pipe_ring_07" type="box" pos="-0.01732 -0.01 0" euler="0 0 -2.6180" size="0.003 0.006 0.04" rgba="0.6 0.6 0.6 1"/>
+                    <geom name="table_pipe_ring_08" type="box" pos="-0.01 -0.01732 0" euler="0 0 -2.0944" size="0.003 0.006 0.04" rgba="0.6 0.6 0.6 1"/>
+                    <geom name="table_pipe_ring_09" type="box" pos="0 -0.02 0" euler="0 0 -1.5708" size="0.003 0.006 0.04" rgba="0.6 0.6 0.6 1"/>
+                    <geom name="table_pipe_ring_10" type="box" pos="0.01 -0.01732 0" euler="0 0 -1.0472" size="0.003 0.006 0.04" rgba="0.6 0.6 0.6 1"/>
+                    <geom name="table_pipe_ring_11" type="box" pos="0.01732 -0.01 0" euler="0 0 -0.5236" size="0.003 0.006 0.04" rgba="0.6 0.6 0.6 1"/>
+                </body>
+            </body>
+        </body>
+        
+        <!-- You can add more tables or adjust position as needed -->
+        <!-- Table and robot positions are defined in the included XMLs, or you can add overrides here if needed. -->
+    </worldbody>
+</mujoco>
