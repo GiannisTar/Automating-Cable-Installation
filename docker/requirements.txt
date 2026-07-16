@@ -1,0 +1,5 @@
+mujoco
+urdf2mjcf
+xacro
+numpy
+mujoco-python-viewer
